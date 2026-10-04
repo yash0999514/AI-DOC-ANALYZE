@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — AI DOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="auth-split-card">
+    <!-- Left: Brand & Highlights -->
+    <div class="auth-brand-side">
+      <div class="auth-brand-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span>AI DOC</span>
+      </div>
+
+      <div class="auth-brand-content">
+        <h2 class="auth-brand-headline">Turn Dense Documents Into Clear Action.</h2>
+        <p class="auth-brand-desc">
+          Sign in to access your saved document library, timeline alerts, extracted clauses, and conversational AI assistant.
+        </p>
+
+        <div class="auth-features-list">
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Real text extraction from PDFs, DOCX, and TXT</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Automatic OCR for scanned papers &amp; images</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Private and isolated user document vaults</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-brand-footer">
+        Strict Privacy &bull; Zero Cross-Tenant Sharing &bull; Encrypted Sessions
+      </div>
+    </div>
+
+    <!-- Right: Login Form -->
+    <div class="auth-form-side">
+      <div class="auth-form-header">
+        <h1 class="auth-form-title">Welcome back</h1>
+        <p class="auth-form-subtitle">Enter your credentials to access your documents</p>
+      </div>
+
+      <form action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST" id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" value="{{ username or '' }}" required autofocus autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+          </div>
+          <div class="password-input-group">
+            <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="toggle-password-btn" id="toggle-password" title="Show/Hide password" aria-label="Toggle password visibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;" id="login-submit-btn">
+          Sign In
+        </button>
+      </form>
+
+      <div class="auth-form-footer">
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Create an account</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.getElementById('toggle-password').addEventListener('click', function() {
+    const pwInput = document.getElementById('password');
+    const isPw = pwInput.type === 'password';
+    pwInput.type = isPw ? 'text' : 'password';
+  });
+
+  document.getElementById('login-form').addEventListener('submit', function() {
+    const btn = document.getElementById('login-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  });
+</script>
+{% endblock %}

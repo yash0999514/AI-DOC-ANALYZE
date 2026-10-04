@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — AI DOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="auth-split-card">
+    <!-- Left: Brand & Highlights -->
+    <div class="auth-brand-side">
+      <div class="auth-brand-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span>AI DOC</span>
+      </div>
+
+      <div class="auth-brand-content">
+        <h2 class="auth-brand-headline">Unlock Deep Intelligence In Seconds.</h2>
+        <p class="auth-brand-desc">
+          Create your account today to analyze legal contracts, financial audits, medical reports, and everyday documents with state-of-the-art AI.
+        </p>
+
+        <div class="auth-features-list">
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Automated timeline &amp; deadline extraction</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Identification of high-risk clauses &amp; responsibilities</span>
+          </div>
+          <div class="auth-feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Interactive grounded AI Assistant for every document</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-brand-footer">
+        No credit card required &bull; Instant document analysis
+      </div>
+    </div>
+
+    <!-- Right: Register Form -->
+    <div class="auth-form-side">
+      <div class="auth-form-header">
+        <h1 class="auth-form-title">Create your account</h1>
+        <p class="auth-form-subtitle">Start analyzing complex documents with AI</p>
+      </div>
+
+      <form action="{{ url_for('auth.register') }}" method="POST" id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input type="text" id="username" name="username" class="form-input" placeholder="Choose a username" value="{{ username or '' }}" required autofocus autocomplete="username" minlength="3" maxlength="30">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Letters, numbers, and underscores (3-30 chars)</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="name@example.com" value="{{ email or '' }}" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-input-group">
+            <input type="password" id="password" name="password" class="form-input" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6">
+            <button type="button" class="toggle-password-btn" id="toggle-reg-password" title="Show/Hide password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Repeat your password" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;" id="register-submit-btn">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-form-footer">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.getElementById('toggle-reg-password').addEventListener('click', function() {
+    const pwInput = document.getElementById('password');
+    const isPw = pwInput.type === 'password';
+    pwInput.type = isPw ? 'text' : 'password';
+  });
+
+  document.getElementById('register-form').addEventListener('submit', function(e) {
+    const p1 = document.getElementById('password').value;
+    const p2 = document.getElementById('confirm_password').value;
+    if (p1 !== p2) {
+      e.preventDefault();
+      AIDoc.showToast("Passwords do not match.", "error");
+      return;
+    }
+
+    const btn = document.getElementById('register-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Creating account...';
+  });
+</script>
+{% endblock %}

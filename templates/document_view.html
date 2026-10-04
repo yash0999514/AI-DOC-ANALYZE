@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document.original_filename }} — AI DOC Analysis{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+<style>
+  .export-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .export-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    width: 180px;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .export-dropdown.active {
+    display: flex;
+  }
+  .export-item {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background var(--transition-fast);
+  }
+  .export-item:hover {
+    background: var(--bg-subtle);
+    color: var(--primary-500);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="doc-view-layout">
+  <!-- Left Column: Document Information & Actions -->
+  <aside class="doc-sidebar-left">
+    <div class="card doc-meta-card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span class="badge badge-{{ document.file_type|lower }}">{{ document.file_type }}</span>
+        <span class="badge badge-analyzed">{{ document.status }}</span>
+      </div>
+
+      <h2 class="doc-meta-title" title="{{ document.original_filename }}">
+        {{ document.original_filename }}
+      </h2>
+
+      <div class="doc-meta-list">
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">File Type</span>
+          <span class="doc-meta-value">{{ document.file_type }}</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">File Size</span>
+          <span class="doc-meta-value">{{ formatted_size }}</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Analyzed On</span>
+          <span class="doc-meta-value">{{ document.created_at.strftime('%b %d, %Y') if document.created_at else 'Recent' }}</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Document Class</span>
+          <span class="doc-meta-value">{{ analysis.get('document_type', 'General') }}</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">AI Engine</span>
+          <span class="doc-meta-value" style="font-size: 0.75rem;">{{ analysis.get('analysis_engine', 'AI DOC Engine') }}</span>
+        </div>
+      </div>
+
+      <div class="doc-actions-vertical">
+        <a href="{{ url_for('documents.download_original', doc_id=document.id) }}" class="btn btn-outline btn-sm" style="width: 100%;">
+          <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Original
+        </a>
+
+        <!-- Export Report Dropdown -->
+        <div class="export-dropdown-wrapper">
+          <button type="button" class="btn btn-primary btn-sm" id="export-menu-btn" style="width: 100%;">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="8 17 12 21 16 17"></polyline>
+              <line x1="12" y1="12" x2="12" y2="21"></line>
+              <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+            </svg>
+            Export Intelligence Report &darr;
+          </button>
+          <div class="export-dropdown" id="export-dropdown-menu">
+            <a href="{{ url_for('documents.export_document', doc_id=document.id, format_type='pdf') }}" class="export-item">
+              <svg style="width: 16px; height: 16px; color: #dc2626;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              PDF Document (.pdf)
+            </a>
+            <a href="{{ url_for('documents.export_document', doc_id=document.id, format_type='docx') }}" class="export-item">
+              <svg style="width: 16px; height: 16px; color: #2563eb;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              Word Document (.docx)
+            </a>
+            <a href="{{ url_for('documents.export_document', doc_id=document.id, format_type='txt') }}" class="export-item">
+              <svg style="width: 16px; height: 16px; color: #64748b;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              Plain Text (.txt)
+            </a>
+          </div>
+        </div>
+
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-ghost btn-sm" style="width: 100%;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Center Column: Analysis Tabs & Content -->
+  <section class="doc-analysis-center">
+    <div class="analysis-header-card">
+      <div>
+        <h1 class="analysis-main-title">
+          {{ analysis.get('document_type', 'Document Analysis') }}
+        </h1>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+          Grounded analysis extracted directly from verified document content.
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" id="copy-summary-btn" title="Copy executive summary">
+        <svg style="width: 15px; height: 15px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy Summary
+      </button>
+    </div>
+
+    <div class="analysis-container-card">
+      <!-- Tabs Navigation -->
+      <div class="nav-tabs analysis-tabs">
+        <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+        <button type="button" class="tab-btn" data-tab="key-points">Key Points ({{ analysis.get('key_points', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="dates">Timeline &amp; Dates ({{ analysis.get('important_dates', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="obligations">Obligations ({{ analysis.get('obligations', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="risks">Risks &amp; Warnings ({{ analysis.get('risks_or_warnings', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="actions">Action Items ({{ analysis.get('action_items', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="terms">Key Terms ({{ analysis.get('key_terms', [])|length }})</button>
+        <button type="button" class="tab-btn" data-tab="preview">Document Viewer</button>
+      </div>
+
+      <!-- Tab: Overview -->
+      <div class="tab-pane active" id="tab-overview">
+        <div class="overview-section">
+          {% if analysis.get('main_purpose') %}
+            <div class="overview-banner">
+              <div class="overview-banner-title">Main Purpose</div>
+              <div class="overview-banner-text">{{ analysis.get('main_purpose') }}</div>
+            </div>
+          {% endif %}
+
+          <div>
+            <h3 class="content-block-title">
+              <svg style="width: 18px; height: 18px; color: var(--primary-500);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="21" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="21" y1="18" x2="3" y2="18"></line>
+              </svg>
+              Executive Summary
+            </h3>
+            <div class="content-block-body" id="summary-content-text" style="white-space: pre-line;">
+              {{ analysis.get('summary', 'No summary available.') }}
+            </div>
+          </div>
+
+          {% if analysis.get('parties_or_entities') %}
+            <div>
+              <h3 class="content-block-title">
+                <svg style="width: 18px; height: 18px; color: var(--accent-indigo);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Identified Parties &amp; Entities
+              </h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for p in analysis.get('parties_or_entities', []) %}
+                  <div style="padding: 8px 14px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.85rem;">
+                    <strong>{{ p.get('name', 'Entity') }}</strong>
+                    <span style="color: var(--text-muted); margin-left: 4px;">({{ p.get('role', 'Participant') }})</span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if analysis.get('simplified_explanation') %}
+            <div style="padding: 18px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+                Simplified Plain-English Explanation
+              </h4>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                {{ analysis.get('simplified_explanation') }}
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Tab: Key Points -->
+      <div class="tab-pane" id="tab-key-points">
+        <div class="points-list">
+          {% for kp in analysis.get('key_points', []) %}
+            <div class="point-item">
+              <div class="point-num">{{ loop.index }}</div>
+              <div>{{ kp }}</div>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted);">No key points extracted.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab: Important Dates Timeline -->
+      <div class="tab-pane" id="tab-dates">
+        {% set dates = analysis.get('important_dates', []) %}
+        {% if dates %}
+          <div class="timeline">
+            {% for d in dates %}
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-date-row">
+                    <span class="badge badge-info">{{ d.get('type', 'Milestone') }}</span>
+                    <span class="timeline-date">{{ d.get('date', 'Date Specified') }}</span>
+                  </div>
+                  <div class="timeline-desc">{{ d.get('event', '') }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: var(--text-muted);">No specific dates or deadlines were identified in this document.</p>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Obligations -->
+      <div class="tab-pane" id="tab-obligations">
+        <div class="obligations-grid">
+          {% for o in analysis.get('obligations', []) %}
+            <div class="obligation-card">
+              <span class="obligation-party-badge">{{ o.get('party', 'Responsible Party') }}</span>
+              <p style="font-size: 0.925rem; color: var(--text-secondary); line-height: 1.6;">
+                {{ o.get('responsibility', '') }}
+              </p>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted);">No explicit obligations were extracted from this document.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab: Risks & Warnings -->
+      <div class="tab-pane" id="tab-risks">
+        <div class="risks-list">
+          {% for r in analysis.get('risks_or_warnings', []) %}
+            {% set sev = r.get('severity', 'Attention')|lower %}
+            <div class="risk-card {{ sev }}">
+              <div class="risk-header">
+                <span class="risk-title">{{ r.get('title', 'Significant Clause') }}</span>
+                <span class="badge badge-{{ 'important' if sev == 'important' else ('attention' if sev == 'attention' else 'info') }}">
+                  {{ r.get('severity', 'Attention') }}
+                </span>
+              </div>
+              <div class="risk-body">
+                {{ r.get('description', '') }}
+              </div>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted);">No critical risks or warnings flagged.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab: Action Items -->
+      <div class="tab-pane" id="tab-actions">
+        <div class="action-items-list">
+          {% for a in analysis.get('action_items', []) %}
+            <div class="action-item-card">
+              <input type="checkbox" class="action-checkbox" id="action-{{ loop.index }}">
+              <label for="action-{{ loop.index }}" class="action-text">{{ a }}</label>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted);">No action items suggested for this document.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab: Key Terms Glossary -->
+      <div class="tab-pane" id="tab-terms">
+        <div class="glossary-grid">
+          {% for t in analysis.get('key_terms', []) %}
+            <div class="glossary-card">
+              <div class="glossary-term">{{ t.get('term', '') }}</div>
+              <div class="glossary-explanation">{{ t.get('explanation', '') }}</div>
+            </div>
+          {% else %}
+            <p style="color: var(--text-muted);">No specialized terms defined in this document.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab: Document Preview -->
+      <div class="tab-pane" id="tab-preview">
+        <div class="preview-container">
+          {% if document.file_type == 'PDF' %}
+            <iframe src="{{ url_for('documents.preview_original', doc_id=document.id) }}" class="preview-iframe" title="Document Preview"></iframe>
+          {% else %}
+            <div class="preview-text-box">{{ document.extracted_text or 'No raw text available.' }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right Column: AI Assistant Chat -->
+  <aside class="doc-assistant-right">
+    <div class="chat-header">
+      <div class="chat-title-group">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="chat-title">AI Assistant</span>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="clear-chat-btn" title="Reset chat" style="font-size: 0.75rem; padding: 4px 8px;">
+        Clear
+      </button>
+    </div>
+
+    <!-- Message Stream -->
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-message assistant">
+        <div class="chat-bubble">
+          Hello! I have reviewed <strong>{{ document.original_filename }}</strong>. Ask me anything about this document — such as obligations, key dates, potential risks, or simple explanations.
+        </div>
+        <div class="chat-meta">System</div>
+      </div>
+    </div>
+
+    <!-- Suggested Quick Prompts -->
+    <div class="suggested-prompts">
+      <div class="suggested-title">Suggested Inquiries</div>
+      <div class="prompt-pills">
+        <button type="button" class="prompt-pill" data-prompt="What are my primary responsibilities and obligations?">My obligations</button>
+        <button type="button" class="prompt-pill" data-prompt="What are the critical dates and deadlines?">Important dates</button>
+        <button type="button" class="prompt-pill" data-prompt="Summarize this document in simple layperson language.">Explain simply</button>
+        <button type="button" class="prompt-pill" data-prompt="Are there any penalties, liabilities, or termination clauses?">Risks &amp; penalties</button>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <div class="chat-input-area">
+      <form id="chat-form" class="chat-form" data-doc-id="{{ document.id }}">
+        <input type="text" id="chat-input" class="chat-input" placeholder="Ask anything about this document..." autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-sm" id="chat-send-btn" title="Send message" aria-label="Send message">
+          <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/document.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

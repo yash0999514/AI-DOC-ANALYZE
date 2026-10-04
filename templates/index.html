@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}AI DOC — Understand Any Document With AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero-section {
+    padding: 72px 0 48px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 20%, var(--primary-50) 0%, transparent 60%);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--primary-600);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .hero-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--text-primary);
+    max-width: 840px;
+    margin: 0 auto 18px;
+  }
+
+  .hero-title span {
+    color: var(--primary-500);
+  }
+
+  .hero-subheading {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 680px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+  }
+
+  .hero-cta-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+  /* Upload Dropzone Container */
+  .upload-box-wrapper {
+    max-width: 640px;
+    margin: 0 auto 72px;
+  }
+
+  .upload-dropzone {
+    background: var(--bg-card);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 44px 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .upload-dropzone:hover, .upload-dropzone.drag-active {
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  [data-theme="dark"] .upload-dropzone:hover,
+  [data-theme="dark"] .upload-dropzone.drag-active {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  .upload-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: var(--primary-50);
+    color: var(--primary-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .upload-icon-circle svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .upload-main-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .upload-sub-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .upload-formats-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .format-pill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
+  }
+
+  /* Features Grid */
+  .features-section {
+    padding: 64px 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .section-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .feature-card {
+    padding: 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--primary-50);
+    color: var(--primary-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .feature-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .feature-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-badge">
+      <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+      Intelligent Document Analysis Engine
+    </div>
+
+    <h1 class="hero-title">
+      Understand Any Document With <span>AI DOC</span>
+    </h1>
+
+    <p class="hero-subheading">
+      Upload complex contracts, policies, invoices, or records. Transform dense legal and technical language into clear summaries, key points, important dates, obligations, and actionable next steps.
+    </p>
+
+    <div class="hero-cta-group">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('documents.dashboard') }}" class="btn btn-primary btn-lg">Go to My Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started Free</a>
+        <a href="{{ url_for('documents.about') }}" class="btn btn-secondary btn-lg">Explore Features</a>
+      {% endif %}
+    </div>
+
+    <!-- Primary Upload Box -->
+    <div class="upload-box-wrapper">
+      <div id="upload-dropzone" class="upload-dropzone">
+        <input type="file" id="upload-file-input" style="display: none;" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+        <div class="upload-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <div class="upload-main-text">Upload your document</div>
+        <div class="upload-sub-text">Drag &amp; drop files here or <span style="color: var(--primary-500); font-weight: 600;">Browse files</span></div>
+        <div class="upload-formats-bar">
+          <span class="format-pill">PDF</span>
+          <span class="format-pill">DOCX</span>
+          <span class="format-pill">TXT</span>
+          <span class="format-pill">JPG</span>
+          <span class="format-pill">PNG</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 6px;">Up to 16MB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Grid -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Capabilities</div>
+      <h2 class="section-title">Built for Real-World Documents</h2>
+    </div>
+
+    <div class="features-grid">
+      <!-- 1 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <h3 class="feature-title">Native &amp; Scanned OCR</h3>
+        <p class="feature-desc">
+          Full support for searchable PDFs, Word documents, text files, and scanned papers. Automatically triggers Tesseract OCR when pages are image-based.
+        </p>
+      </div>
+
+      <!-- 2 -->
+      <div class="feature-card">
+        <div class="feature-icon" style="color: var(--accent-indigo); background: var(--accent-indigo-subtle);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+        </div>
+        <h3 class="feature-title">Timeline &amp; Dates</h3>
+        <p class="feature-desc">
+          Extracts effective dates, renewal windows, deadlines, and termination dates. Visualizes them on a clean, chronological timeline.
+        </p>
+      </div>
+
+      <!-- 3 -->
+      <div class="feature-card">
+        <div class="feature-icon" style="color: var(--accent-emerald); background: var(--accent-emerald-subtle);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Obligations &amp; Risks</h3>
+        <p class="feature-desc">
+          Identifies who is responsible for what. Flags potential liability, indemnification, strict penalties, and missing required items with semantic severity labels.
+        </p>
+      </div>
+
+      <!-- 4 -->
+      <div class="feature-card">
+        <div class="feature-icon" style="color: var(--accent-amber); background: var(--accent-amber-subtle);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Document-Grounded Q&amp;A</h3>
+        <p class="feature-desc">
+          Ask questions directly about your document. The AI assistant responds strictly using the document's verified text, eliminating hallucination.
+        </p>
+      </div>
+
+      <!-- 5 -->
+      <div class="feature-card">
+        <div class="feature-icon" style="color: var(--accent-rose); background: var(--accent-rose-subtle);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Per-User Data Isolation</h3>
+        <p class="feature-desc">
+          Strict authorization checks. Your files and analysis are securely isolated and never accessible by other users.
+        </p>
+      </div>
+
+      <!-- 6 -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <h3 class="feature-title">Comprehensive Export</h3>
+        <p class="feature-desc">
+          Download structured intelligence reports as formatted PDF, DOCX, or TXT containing summaries, obligations, timelines, and terms.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Server Error (500) — AI DOC{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding: 96px 20px; text-align: center;">
+  <div style="font-size: 5rem; font-weight: 900; color: var(--accent-rose); line-height: 1; margin-bottom: 16px;">
+    500
+  </div>
+  <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">
+    Server Encountered An Issue
+  </h1>
+  <p style="font-size: 1rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 32px; line-height: 1.6;">
+    An unexpected error occurred while processing your request. Our system has safely prevented data corruption. Please refresh or try again in a moment.
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{{ url_for('documents.index') }}" class="btn btn-secondary">Go to Homepage</a>
+    <a href="{{ url_for('documents.dashboard') if session.get('user_id') else url_for('auth.login') }}" class="btn btn-primary">
+      Return to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

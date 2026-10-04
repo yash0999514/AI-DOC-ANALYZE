@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}File Too Large (413) — AI DOC{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding: 96px 20px; text-align: center;">
+  <div style="font-size: 5rem; font-weight: 900; color: var(--accent-amber); line-height: 1; margin-bottom: 16px;">
+    413
+  </div>
+  <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">
+    File Exceeds Size Limit
+  </h1>
+  <p style="font-size: 1rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 32px; line-height: 1.6;">
+    Your uploaded file exceeds the maximum allowed size of 16MB. Please compress the document or upload a smaller file.
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{{ url_for('documents.dashboard') if session.get('user_id') else url_for('documents.index') }}" class="btn btn-primary">
+      Try Another Document
+    </a>
+  </div>
+</div>
+{% endblock %}

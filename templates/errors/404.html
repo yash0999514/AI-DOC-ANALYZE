@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found (404) — AI DOC{% endblock %}
+
+{% block content %}
+<div class="container container-narrow" style="padding: 96px 20px; text-align: center;">
+  <div style="font-size: 5rem; font-weight: 900; color: var(--primary-500); line-height: 1; margin-bottom: 16px;">
+    404
+  </div>
+  <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px;">
+    {{ error_title or "Page Not Found" }}
+  </h1>
+  <p style="font-size: 1rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 32px; line-height: 1.6;">
+    {{ error_message or "The page or document you requested could not be found. It may have been deleted, moved, or you may not have permission to view it." }}
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{{ url_for('documents.index') }}" class="btn btn-secondary">Go to Homepage</a>
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('documents.dashboard') }}" class="btn btn-primary">My Dashboard</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign In</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

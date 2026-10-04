@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+import sys, os
+if "/home/spark/pylib" not in sys.path:
+    sys.path.insert(0, "/home/spark/pylib")
+try:
+    import sitecustomize
+except Exception:
+    pass
+import pytest
+sys.exit(pytest.main())

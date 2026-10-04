@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — AI DOC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Left Sidebar -->
+  <aside class="dashboard-sidebar">
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('documents.dashboard') }}" class="sidebar-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{{ url_for('documents.dashboard') }}" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <span>My Documents</span>
+      </a>
+
+      <a href="{{ url_for('documents.about') }}" class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>How It Works</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile-chip">
+        <div class="user-avatar">{{ user.username[0]|upper }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ user.username }}</div>
+          <div class="user-role">{{ user.email or 'Personal Account' }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 10px;">
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="dashboard-hero">
+      <div>
+        <h1 class="welcome-title">Welcome back, {{ user.username }}</h1>
+        <p class="welcome-subtitle">Search, inspect, and analyze intelligence across your uploaded documents.</p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('upload-file-input').click()">
+          <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Upload Document
+        </button>
+      </div>
+    </div>
+
+    <!-- Hidden file input for dashboard button -->
+    <input type="file" id="upload-file-input" style="display: none;" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+    <div id="upload-dropzone" style="display: none;"></div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-label">Documents Analyzed</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.recent }}</div>
+          <div class="stat-label">Uploaded This Week</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.processing }}</div>
+          <div class="stat-label">Active / In Progress</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.storage }}</div>
+          <div class="stat-label">Storage Consumed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar: Search, Filters, Sort -->
+    <div class="documents-toolbar">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-docs-input" class="form-input search-input" placeholder="Search by filename or content...">
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <!-- Filters -->
+        <div class="filter-group">
+          <button type="button" class="filter-btn active" data-filter="ALL">All</button>
+          <button type="button" class="filter-btn" data-filter="PDF">PDF</button>
+          <button type="button" class="filter-btn" data-filter="DOCX">DOCX</button>
+          <button type="button" class="filter-btn" data-filter="IMAGES">Images</button>
+          <button type="button" class="filter-btn" data-filter="TXT">TXT</button>
+        </div>
+
+        <!-- Sort Select -->
+        <select id="sort-docs-select" class="form-select" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+          <option value="newest">Sort: Newest</option>
+          <option value="oldest">Sort: Oldest</option>
+          <option value="name_asc">Name: A &rarr; Z</option>
+          <option value="name_desc">Name: Z &rarr; A</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Documents Grid -->
+    {% if documents and documents|length > 0 %}
+      <div id="documents-grid" class="documents-grid">
+        {% for doc in documents %}
+          <div class="doc-card"
+               data-id="{{ doc.id }}"
+               data-filename="{{ doc.original_filename|lower }}"
+               data-summary="{{ doc.summary|lower if doc.summary else '' }}"
+               data-type="{{ doc.file_type }}"
+               data-date="{{ doc.created_at.isoformat() if doc.created_at else '' }}">
+            
+            <div class="doc-card-header">
+              <div class="doc-icon-wrapper">
+                {% if doc.file_type == 'PDF' %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #dc2626;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                {% elif doc.file_type == 'DOCX' %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #4338ca;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                {% elif doc.file_type == 'TXT' %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                {% else %}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #d97706;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                {% endif %}
+              </div>
+
+              <div class="doc-card-title-block">
+                <div class="doc-card-title" title="{{ doc.original_filename }}">{{ doc.original_filename }}</div>
+                <div class="doc-card-meta">
+                  <span class="badge badge-{{ doc.file_type|lower }}">{{ doc.file_type }}</span>
+                  <span>&bull;</span>
+                  <span>{{ doc.created_at.strftime('%b %d, %Y') if doc.created_at else '' }}</span>
+                  <span>&bull;</span>
+                  <span class="badge badge-analyzed">Analyzed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="doc-card-summary">
+              {{ doc.summary or "Summary not available yet." }}
+            </div>
+
+            <div class="doc-card-actions">
+              <a href="{{ url_for('documents.view_document', doc_id=doc.id) }}" class="btn btn-primary btn-sm">
+                Open Analysis
+              </a>
+
+              <div style="display: flex; gap: 6px;">
+                <a href="{{ url_for('documents.download_original', doc_id=doc.id) }}" class="btn btn-outline btn-sm btn-icon" title="Download original file" aria-label="Download">
+                  <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </a>
+
+                <button type="button" class="btn btn-ghost btn-sm btn-icon delete-doc-trigger"
+                        data-id="{{ doc.id }}"
+                        data-name="{{ doc.original_filename }}"
+                        title="Delete document"
+                        aria-label="Delete">
+                  <svg style="width: 16px; height: 16px; color: var(--accent-rose);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div id="no-matches-state" class="empty-state" style="display: none; margin-top: 24px;">
+        <h3 class="empty-state-title">No matching documents</h3>
+        <p class="empty-state-desc">Try adjusting your search terms or filter selection.</p>
+      </div>
+
+      <div id="dashboard-empty-state" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <h2 class="empty-state-title">No documents yet</h2>
+        <p class="empty-state-desc">Upload your first document to extract real insights, timelines, obligations, and ask questions.</p>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('upload-file-input').click()">
+          Analyze Document
+        </button>
+      </div>
+
+    {% else %}
+      <!-- Empty State -->
+      <div id="dashboard-empty-state" class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <h2 class="empty-state-title">No documents yet</h2>
+        <p class="empty-state-desc">Upload your first document to extract real insights, timelines, obligations, and ask questions.</p>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('upload-file-input').click()">
+          Analyze Document
+        </button>
+      </div>
+    {% endif %}
+  </main>
+</div>
+
+<!-- Accessible Delete Confirmation Modal -->
+<div id="delete-modal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="card-header">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+        <svg style="width: 20px; height: 20px; color: var(--accent-rose);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        Delete Document?
+      </h3>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+        Are you sure you want to permanently delete <strong id="delete-doc-name" style="color: var(--text-primary);">this document</strong>?
+      </p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+        This action cannot be undone. The uploaded file, extracted text, and AI analysis will be permanently erased.
+      </p>
+    </div>
+    <div class="card-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
